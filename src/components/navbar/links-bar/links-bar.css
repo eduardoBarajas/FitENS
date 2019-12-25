@@ -1,0 +1,37 @@
+.MuiTabs-root {
+    width: 100%;
+}
+
+@keyframes hover_tab_animation {
+    0%   {font-size: 1rem;}
+    10%   {font-size: 1.01rem;}
+    20%   {font-size: 1.02rem;}
+    30%   {font-size: 1.03rem;}
+    40%   {font-size: 1.04rem;}
+    50%   {font-size: 1.05rem;}
+    60%   {font-size: 1.06rem;}
+    70%   {font-size: 1.07rem;}
+    80%   {font-size: 1.08rem;}
+    90%   {font-size: 1.09rem;}
+    100%   {font-size: 1.1rem;}
+}
+
+.MuiButtonBase-root {
+    width: 20vw;
+}
+
+.mTab {
+    color: white!important;
+}
+
+.mTab:hover {
+    animation-name: hover_tab_animation;
+    animation-duration: .5s;
+    animation-timing-function: ease-in;
+    font-size: 1.1rem;
+}
+
+.tab_active {
+    font-size: 1.1rem!important;
+    color: yellow!important;
+}

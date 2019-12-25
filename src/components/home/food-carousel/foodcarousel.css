@@ -1,0 +1,41 @@
+.grid-food-container {
+    padding: 2em!important;
+}
+.grid-food-carousel-item {
+    margin-top: 2em!important;
+}
+
+.grid-food-carousel-item-text {
+    margin-top: 2em!important;
+}
+
+.grid-food-carousel-item > img {
+    width: inherit;
+    height: 80vh;
+}
+
+.text-paper-layout {
+    width: 100%;
+}
+
+.food-title-div {
+    position: relative;
+    height: min-content;
+    top: calc(40vh - 10px);
+    text-align: center;
+}
+
+@media (max-width: 425px) {
+    .grid-food-carousel-item > img {
+        opacity: .6;
+    }
+    /*Se coloca en 0 px para evitar que tome espacio cuando se eleva el texto en pantallas moviles*/
+    .grid-food-carousel-item-text {
+        height: 0px;
+    }
+    /*Se eleva el div con el texto*/
+    .food-title-div {
+        top: calc(-40vh + 10px);
+    }
+}
+

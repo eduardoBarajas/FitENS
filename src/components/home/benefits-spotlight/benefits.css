@@ -1,0 +1,17 @@
+@keyframes GreenToRedKeyFrames {
+    0%   {color:  rgba(27, 94, 32, 1)}
+    10%   {color:  rgba(27, 94, 32, 0.8)}
+    20%   {color:  rgba(27, 94, 32, 0.6)}
+    30%   {color:  rgba(27, 94, 32, 0.4)}
+    40%   {color:  rgba(27, 94, 32, 0.2)}
+    50%   {color: rgba(213,0,0 ,1, 0.2)}
+    60%   {color: rgba(213,0,0 ,1, 0.4)}
+    70%   {color: rgba(213,0,0 ,1, 0.6)}
+    80%   {color: rgba(213,0,0 ,1, 0.8)}
+    90%   {color: rgba(213,0,0 ,1, 0.9)}
+    100%   {color: rgba(213,0,0 ,1, 1)};
+}
+.benefit_spotlight_icon {
+    width: 4em!important;
+    height: 3em!important;
+}

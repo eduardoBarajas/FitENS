@@ -1,0 +1,8 @@
+.option_active {
+    color: white!important;
+    background-color: green!important;
+}
+
+.last_sidebar_option {
+    margin-bottom: 1em!important;
+}

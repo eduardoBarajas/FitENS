@@ -1,0 +1,25 @@
+.mAvatarMenuSidebar {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: .5em;
+    margin-bottom: .5em;
+    background-color: darkslateblue!important;
+}
+
+.mPaperLayout {
+    max-width: 60vw;
+    background-image: url('../../../../assets/images/bg-2.jpg');
+    margin-bottom: 1.5em;
+}
+
+.user_name_sidebar {
+    color: white;
+    padding: 0.5em;
+}
+
+.user_role_sidebar {
+    color: white;
+    padding-right: .8em;
+    padding-left: .8em;
+    padding-bottom: .8em;
+}
