@@ -13,6 +13,7 @@ import amber from '@material-ui/core/colors/amber';
 import {
 	BrowserRouter as Router, Switch, Route, Link
   } from 'react-router-dom';
+import NewFoodForm from '../menu/admin/newFoodForm/newFoodForm';
 
 const theme = createMuiTheme({
   palette: {
@@ -38,10 +39,10 @@ const App: React.FC = () => {
 		    <HomeComponent />
 		  </Route>
 		  <Route path="/Menu">
-		    <MenuHome />
+		    <NewFoodForm />
 		  </Route>
 		  <Route path="/Ejercicios">
-		    <EjerciciosHome />
+		    <MenuHome />
 		  </Route>
 		  <Route path="/Pedidos">
 		    <PedidosHome />

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useReducer} from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -13,6 +13,10 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import FoodService from '../../../services/foods/foodService';
 import Food from '../../../entities/food';
+import {ArrayMerger} from '../../../utils/ArrayMerger';
+
+// constante que define cual es el numero de elementos que traera de la api por click.
+const ADD_CANT = 2;
 
 const useStyles = makeStyles(theme => ({
     grid: {
@@ -35,17 +39,61 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+function initState() {
+    return {
+        retrievedAll: false,
+        showMoreEntries: false
+    };
+}
+
+function reducer(state: any, action: any) {
+    switch (action.type) {
+        case 'showMoreEntries': return {...state, showMoreEntries: true};
+        case 'retrievedAll': return {...state, showMoreEntries: false, retrievedAll: true};
+    }
+}
+
 type IMenuHomeProps = {
     show?: boolean
 };
-
-const grid_elements: any[] = [];
+// arreglo que contendra la lista de comidas.
+let food_elements: Food[] = [];
+// arreglo que continen los elementos que se para realizar el render.
+let grid_elements: any[] = [];
 
 const MenuHome: React.FC<IMenuHomeProps> = (props) => {
     const classes = useStyles();
-    FoodService.insertOne(new Food(1, 'Lol', 'lolxd', 12.50, {'kcal': 22, 'proteinas': 212}, ['xd.jpg']));
-    renderElements(0, classes);
-    const [showMoreEntries, setShowMoreEntries] = useState(false);
+    const [state, dispatcher] = useReducer(reducer, undefined, initState);
+    // mientras que no se hayan obtenido todos los registros
+    if (!state.retrievedAll && state.showMoreEntries) {
+        grid_elements = [];
+        for (let i = 0; i < food_elements.length; i++) {
+            grid_elements.push(
+                <Grid key={i} container item xs={12} sm={4} md={4} lg={4} xl={4}>
+                    <Card elevation={4} className={classes.grid_card}>
+                        <CardActionArea>
+                            <CardMedia
+                            className={classes.grid_image}
+                            component="img"
+                            alt={food_elements[i].name}
+                            height="140"
+                            image={food_elements[i].images[0]}
+                            title={food_elements[i].name}
+                            />
+                            <CardContent className={classes.grid_card_content}>
+                            <Typography gutterBottom variant="h5" component="h2">
+                                {food_elements[i].name}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" component="p">
+                                {food_elements[i].description}
+                            </Typography>
+                            </CardContent>
+                        </CardActionArea>
+                    </Card>
+                </Grid>
+            );
+        }
+    }
     let elements = 
     <React.Fragment>
         <CssBaseline />
@@ -55,16 +103,28 @@ const MenuHome: React.FC<IMenuHomeProps> = (props) => {
                     <PanelBusqueda title={StaticData.menu.search_title_label} fields={StaticData.menu.search_fields} listener={executeSearch}/>
                 </Grid>
                 <Grid container item xs={12} sm={12} md={12} lg={12} xl={12}>
-                    <VerticalGrid entries={grid_elements} onMoreShowData={(dataSize: number, callback: any) => {
-                        console.log(dataSize);
-                        setShowMoreEntries(true);
-                        // dataSize nos dira el tamanio del arreglo para poder sumarle 5 y obtener los nuevos datos.
-                        renderElements(dataSize + 5, classes);
-                        setTimeout(() => {
-                            // llamamos la funcion callback para que el componente hijo sepa que ya se actualizaron los datos.
-                            callback();
-                            setShowMoreEntries(false);
-                        }, 2000);
+                    <VerticalGrid hideLoadMoreButton={state.retrievedAll} entries={grid_elements} onMoreShowData={(callback: any) => {
+                        let start = food_elements.length;
+                        // traemos los registros de la api.
+                        FoodService.paginate(start, ADD_CANT).then((result: any) => {
+                            if (result.status === 200 && result.data.status === 'success') {
+                                // si se obtuvieron con exito entonces unimos los dos arrays.
+                                ArrayMerger<Food>(food_elements, result.data.data, ((new_array: Food[]) => {
+                                    if (new_array != null) {
+                                        // si el nuevo arreglo no es nulo, es por que si fue modificado.
+                                        food_elements = new_array;
+                                        dispatcher({type: 'showMoreEntries'});
+                                        // si se llego al total de registros en la api se cambia de estado.
+                                        if (result.data.count === food_elements.length) {
+                                            // por lo que se marca como obtenidos todos para desaparecer el boton.
+                                            dispatcher({type: 'retrievedAll'});
+                                        }
+                                    }
+                                    // llamamos la funcion callback para que el componente hijo sepa que ya se actualizaron los datos.
+                                    callback();
+                                }));
+                            }
+                        });
                     }}/>
                 </Grid>
             </Grid>
@@ -77,45 +137,5 @@ function executeSearch(searchParams: any) {
     console.log('Ejecutar Busqueda');
     console.log(searchParams);
 }
-
-function renderElements(new_size: number, classes: any) {
-    if (new_size === 0) {
-        if (grid_elements.length !== 0) {
-            return;
-        } else {
-            new_size = 5;
-        }
-    }
-    grid_elements.splice(0, grid_elements.length);
-    for (let i = 0; i < new_size; i++) {
-        grid_elements.push(
-            <Grid key={i} container item xs={12} sm={4} md={4} lg={4} xl={4}>
-                <Card elevation={4} className={classes.grid_card}>
-                    <CardActionArea>
-                        <CardMedia
-                        className={classes.grid_image}
-                        component="img"
-                        alt="Comida ejemplo"
-                        height="140"
-                        image={require('../../../assets/images/example.png')}
-                        title="Comida ejemplo"
-                        />
-                        <CardContent className={classes.grid_card_content}>
-                        <Typography gutterBottom variant="h5" component="h2">
-                            Lizard
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary" component="p">
-                            Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
-                            across all continents except Antarctica
-                        </Typography>
-                        </CardContent>
-                    </CardActionArea>
-                </Card>
-            </Grid>
-        );
-    }
-}
-
-
 
 export default MenuHome;

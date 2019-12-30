@@ -20,7 +20,8 @@ const useStyles = makeStyles(theme => ({
 interface IVerticalGrid {
     show?: boolean,
     onMoreShowData: any,
-    entries: any[]
+    entries: any[],
+    hideLoadMoreButton: boolean
 };
 
 const VerticalGrid: React.FC<IVerticalGrid> = (props) => {
@@ -28,16 +29,23 @@ const VerticalGrid: React.FC<IVerticalGrid> = (props) => {
     const classes = useStyles();
     // definimos los estados iniciales.
     const [loadingElementsState, setLoadingElementsState] = useState(false);
-    let button = <Button size="large" onClick={() => {
-            console.log('cargando');
+    let button;
+    // si aun no ha mostrado todos los elementos se sigue mostrando el boton.
+    if (!props.hideLoadMoreButton) {
+        // si esta el estado de cargando se cambia.
+        if (loadingElementsState)
+            setLoadingElementsState(false);
+        button = <Button size="large" onClick={() => {
             setLoadingElementsState(true);
-            props.onMoreShowData(props.entries.length, () => {
+            props.onMoreShowData(() => {
                 setLoadingElementsState(false);
-                console.log('cargadooo');
             });
         }}>
         Cargar Mas Comidas
         </Button>;
+    } else {
+        button = null;
+    }
     return (
         <div>
             <Grid container spacing={2}>
