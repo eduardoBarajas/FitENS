@@ -43,12 +43,12 @@ class SideMenu extends React.Component<ISideMenuProps, ISideMenuState> {
             }
             let new_option = <ListItem className={option_classes} onClick={() => this.optionSelected(list_key, option[key][0])} button key={list_key}>
                 <ListItemIcon>{option[key][1]}</ListItemIcon>
-                <ListItemText primary={key}/>
+                <ListItemText className={'mOption-text'} primary={key}/>
             </ListItem>;
             this.drawer_options.push(new_option);
         });
         return (
-            <Drawer open={this.props.drawer_opened} onClose={() => this.props.toggle_drawer()}>
+            <Drawer className={'drawer'} open={this.props.drawer_opened} onClose={() => this.props.toggle_drawer()}>
                 <LogoSideMenu/>
                 {this.drawer_options}
                 {this.props.login_btn}

@@ -1,6 +1,6 @@
 import firebase from 'firebase';
 import { EEXIST } from 'constants';
-
+const axios = require('axios').default;
 const firebaseConfig = {
     apiKey: "AIzaSyB1LKzSELcOuXiHRhdxY2fXecKyaRotM6Y",
     authDomain: "codens-18ad2.firebaseapp.com",

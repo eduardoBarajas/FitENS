@@ -14,6 +14,9 @@ const useStyles = makeStyles(theme => ({
         '& button': {
             width: '100%'
         }
+    },
+    root_div: {
+        margin: 'auto',
     }
 }));
 
@@ -47,7 +50,7 @@ const VerticalGrid: React.FC<IVerticalGrid> = (props) => {
         button = null;
     }
     return (
-        <div>
+        <div className={classes.root_div}>
             <Grid container spacing={2}>
                 {props.entries}
                 <Grid className={classes.button_row} container item xs={12} sm={12} md={12} lg={12} xl={12}>

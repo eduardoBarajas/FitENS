@@ -3,6 +3,18 @@
     background-color: green!important;
 }
 
+.mOption-text {
+    text-align: center;
+}
+
 .last_sidebar_option {
     margin-bottom: 1em!important;
+}
+
+.drawer {
+    width: 70vw;
+}
+
+.drawer > div {
+    width: inherit;
 }

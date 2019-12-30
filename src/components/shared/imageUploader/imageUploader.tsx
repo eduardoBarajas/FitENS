@@ -15,6 +15,7 @@ import {fileUpload, fileDelete} from '../../../utils/FirebaseFileUploader';
 import Slide from '@material-ui/core/Slide';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AlertDialog from '../alertDialog/alertDialog';
+import Tooltip from '@material-ui/core/Tooltip';
 require('./imageUploader.css');
 
 const IMAGES_STORAGE_REF = '/fitens/images/[CATEGORY]/';
@@ -145,15 +146,17 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = (props) => {
         <div className={classes.root}>
             <GridList className={classes.gridList} cols={2.5}>
             <GridListTile key={0} className={classes.grid_list_add_new_tile}>
-                <Button disabled={state.busy} className={'add_image_button ' + (state.busy ? 'add_image_button_loading' : '')} size="medium" color="primary" aria-label="add" onClick={(e) => {
-                    e.preventDefault();
-                    fileSelector.click();
-                }}>
-                    <div>
-                        <PhotoCameraIcon className={'icon_camera ' + (state.busy ? 'icon_camera_loading' : '')} />
-                        <Typography variant="body2">{(state.busy ? 'Cargando...' : 'Nueva Imagen')}</Typography>
-                    </div>
-                </Button>
+                <Tooltip title="Delete">
+                    <Button disabled={state.busy} className={'add_image_button ' + (state.busy ? 'add_image_button_loading' : '')} size="medium" color="primary" aria-label="add" onClick={(e) => {
+                        e.preventDefault();
+                        fileSelector.click();
+                    }}>
+                        <div>
+                            <PhotoCameraIcon className={'icon_camera ' + (state.busy ? 'icon_camera_loading' : '')} />
+                            <Typography variant="body2">{(state.busy ? 'Cargando...' : 'Nueva Imagen')}</Typography>
+                        </div>
+                    </Button>
+                </Tooltip>
             </GridListTile>
             {props.images.map(image => (
                 <Slide key={props.images.indexOf(image) + 1} direction="left" in={true} mountOnEnter unmountOnExit>

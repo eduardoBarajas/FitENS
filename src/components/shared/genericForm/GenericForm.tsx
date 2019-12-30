@@ -72,8 +72,7 @@ const ENTRY_ADDED = 200;
 const FORM_CLEARED = 201;
 const FORM_SUBMITED = 202;
 const INVALID_FORM = 203;
-
-
+const FORM_UNTOUCHED = 204;
     
 // funcion que inicializa los estados de los inputs.
 function initStates(inputs: any[]) {
@@ -97,30 +96,25 @@ function initStates(inputs: any[]) {
         });
     }
     // por ultimo se crea el objeto de estados y se regresa.
-    return {alertDialogOpen: false, addNew: false, loading: false, redrawComponent: '', images: [],
+    return {form_status: FORM_UNTOUCHED, alertDialogOpen: false, addNew: false, loading: false, updateComponent: '', images: [],
         snackbarOpen: false, ...states};
 }
 
 // funcion en la que se manejan los estados.
 function reducer(state: any, action: any) {
     switch (action.type) {
+        // cuando se vaya a agregar un nuevo registro debera entrar aqui.
+        case 'SubmitForm': return {...state, form_status: FORM_SUBMITED, addNew: true, loading: true, snackbarOpen: false};
+        case 'invalidForm': return {...state, form_status: INVALID_FORM, addNew: false, loading: false, snackbarOpen: true};
         // cuando se quieran reiniciar los estados debera entrar aqui.
-        case 'clean': grid_elements = []; return initStates([]);
-        case 'newRegisterAdded': {
-            grid_elements = [];
-            let obj = initStates([]);
-            // al agregar un nuevo registro reiniciamos el estado pero dejamos abierto el snackbar para mostrar el mensaje.
-            obj['snackbarOpen'] = true;
-            // cambiamos esto para no crear un nuevo estado, y que al momento de guardar el registro no se eliminen las imagenes
-            obj['redrawComponent'] = 'ALL';
-            return obj;
-        }
+        case 'CleanForm': grid_elements = []; return {...initStates([]), form_status: FORM_CLEARED};
+        case 'EntryAdded': grid_elements = []; return {...initStates([]), snackbarOpen: true, form_status: FORM_UNTOUCHED}
         // si se subio una nueva imagen en el componente entrara aqui.
         case 'imageUpload': {
             if (action.status === 'success') {
                 state.images.push(action.image);
                 snackbar_data = {message: 'Se agrego correctamente', status: action.status};
-                return {...state, snackbarOpen: true, redrawComponent: action.label};
+                return {...state, snackbarOpen: true, updateComponent: action.label};
             } else {
                 // si fallo solamente se muestra el mensaje de error.
                 snackbar_data = {message: 'Ocurrio un problema', status: action.status};
@@ -131,14 +125,7 @@ function reducer(state: any, action: any) {
             //si se elimino una imagen, se quita del arreglo y se muestra el mensaje.
             state.images.splice(action.index, 1);
             snackbar_data = {message: 'Se elimino correctamente', status: 'success'};
-            return {...state, snackbarOpen: true, redrawComponent: action.label};
-        }
-        // cuando se vaya a agregar un nuevo registro debera entrar aqui.
-        case 'submit': {
-            return {...state, addNew: true, loading: true, snackbarOpen: false};
-        }
-        case 'invalidForm': {
-            return {...state, addNew: false, loading: false, snackbarOpen: true};
+            return {...state, snackbarOpen: true, updateComponent: action.label};
         }
         case 'snackbarShow': {
             // si se envia un mensaje se agrega a los datos del snackbar si no solo se cambia el estado.
@@ -151,7 +138,7 @@ function reducer(state: any, action: any) {
     // si no es un estado de tipo especifico, lo obtendra con el label del input directamente.
     obj[action.type] = {value: action.newValue, error: action.error}
     // se agrega el componente que el cual sera actualizado en la vista.
-    obj['redrawComponent'] = action.type;
+    obj.updateComponent = action.type;
     return obj;
 }
 
@@ -168,17 +155,15 @@ const GenericForm: React.FC<GenericFormProps> = (props) => {
     const [state, dispatch] = useReducer(reducer, props.form_inputs, initStates);
     console.log(state);
     // si se agrego un nuevo registro entra aqui
-    if (state.addNew) {
-        console.log('addnew');
+    if (state.form_status === FORM_SUBMITED) {
         // validamos que los datos sean los necesarios para poder almacenar.
         if (validateForm(state)) {
-            console.log('valido');
             // si el formulario es valido se agrega el registro a la bd y se limpia.
             props.onSubmit(state).then( (result: any) => {
                 if (result.status === 'success') {
                     snackbar_data = {message: result.message, status: result.status}; 
                     // limpiamos el formulario.
-                    dispatch({type: 'newRegisterAdded'});
+                    dispatch({type: 'EntryAdded'});
                     console.log('entro aqui alv');
                     // regresamos al inicio de la vista con scroll.
                     window.scroll({ top: 0, left: 0, behavior: 'smooth' });
@@ -194,14 +179,14 @@ const GenericForm: React.FC<GenericFormProps> = (props) => {
         // hacemos una copia del arreglo de elementos en caso de que solo se ocupe reemplazar un componente.
         let temp_list: any[];
         // debido a que no se renderearan los nuevos elementos a menos que la estructura de datos cambie.
-        if (state.redrawComponent.length > 0)
+        if (state.updateComponent.length > 0)
             temp_list = [...grid_elements];
         grid_elements = [];
         // solo si es la primera vez que se entra se van a renderizar todos los elementos.
         props.form_inputs.forEach((input: any) => {
             let element: any;
             // si el estado para realizar una actualizacion de render es la inicial o si un input cambio entonces entra.
-            if (state.redrawComponent === '' || state.redrawComponent === 'ALL' || state.redrawComponent === input.label) {
+            if (state.updateComponent === '' || state.updateComponent === input.label) {
                 switch (input.type) {
                     // si es del tipo input se agrega un textfield.
                     case 'input': {
@@ -226,17 +211,17 @@ const GenericForm: React.FC<GenericFormProps> = (props) => {
                     // el dispatcher para modificar el estado.
                     case 'imageselector': {
                         element = <Grid key={input.key} container item xs={12} sm={12}>
-                                <ImageUploaderComponent clearAll={(state.redrawComponent === '') ? true : false} validation={input.validation} images={state.images} imagesRef={props.imagesRef} label={input.label} stateDispatcher={dispatch}/>
+                                <ImageUploaderComponent clearAll={state.form_status === FORM_CLEARED} validation={input.validation} images={state.images} imagesRef={props.imagesRef} label={input.label} stateDispatcher={dispatch}/>
                             </Grid>;
                         break;
                     }
                 }
                 // si el estado para renderear un componente no ha cambiado, significa que es la primera vez que se renderizara.
-                if (state.redrawComponent === '' || state.redrawComponent === 'ALL') {
+                if (state.updateComponent === '') {
                     grid_elements.push(element); 
                 } else {
                     // si el componente que se desea renderizar esta definido entonces solo modificamos ese elemento del arreglo.
-                    if (state.redrawComponent === input.label) {
+                    if (state.updateComponent === input.label) {
                         temp_list.splice(input.key, 1, element);
                         grid_elements = [...temp_list];
                     }
@@ -265,10 +250,10 @@ const GenericForm: React.FC<GenericFormProps> = (props) => {
                             <Button disabled={state.loading} className={classes.button_form}>Regresar</Button>
                         </Grid>
                         <Grid container item xs={4} sm={4}>
-                            <Button disabled={state.loading} className={classes.button_form} onClick={() => dispatch({type: 'clean'})}>Limpiar</Button>
+                            <Button disabled={state.loading} className={classes.button_form} onClick={() => dispatch({type: 'CleanForm'})}>Limpiar</Button>
                         </Grid>
                         <Grid container item xs={4} sm={4}>
-                            <Button disabled={state.loading} className={classes.button_form} color="primary" onClick={() => dispatch({type: 'submit'})}>Guardar</Button>
+                            <Button disabled={state.loading} className={classes.button_form} color="primary" onClick={() => dispatch({type: 'SubmitForm'})}>Guardar</Button>
                         </Grid>
                     </Grid>
                     {loading_column}
